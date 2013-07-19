@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<widget xmlns="http://www.w3.org/ns/widgets" id="http://www.webinos.org/hub-webinosVehicle" version="1.0" height="540" width="960">
+  <!-- Name of the widget -->
+  <name short="hub-webinosVehicle">hub webinosVehicle</name>
+  <!-- Description is shown when installing widget -->
+  <description>Webinos Vehicle Hub is a cross-device Diagnostic manager. Diagnostic Data can be viewed on any webinos-enabled CE device. Webinos Vehicle Hub lets you directly interact with the on-board naviation system.</description>
+  <!-- Start page for widget -->
+  <content src="index.html" />
+  <!-- Default icon for widget -->
+  <icon src="logo.png" />
+  <!-- Widget author -->
+  <author href="http://webinos.org">Krishna Bangalore</author>
+  <!-- No webinos feature is required -->
+  <!-- Distributed under the Apache 2.0 licence -->
+  <license href="http://www.apache.org/licenses/LICENSE-2.0.html">Distributed under the Apache 2.0 License.</license>
+</widget>
