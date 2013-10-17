@@ -6,13 +6,12 @@ var map;
 var geocoder;
 var mapBounds;
 var allServices = {};
-var vehicle;
+var sensors = {};
+var sensorActive = {};
 var geolocation;
 var deviceorientation;
 var ps;
-
 var gear;
-
 
 var active = '#drive';
 
@@ -20,8 +19,6 @@ var selecterOn = false;
 var pdcEnabled = false;
 
 var currentCustomField = '';
-
-
 
 dataModel = [{id: 'selecter-gear', desc:'Gear' , unit: '', defaultV:'10', customField: 'customfield1'}, 
 {id: 'selecter-speed', desc:'Speed' , unit: 'kmph', defaultV:'0.0', customField: 'customfield2'}, 
@@ -50,8 +47,7 @@ function initializeMap() {
       
     };
 
-    map = new google.maps.Map(document.getElementById("map"),
-            mapOptions);
+    map = new google.maps.Map(document.getElementById("map"), mapOptions);
     geocoder = new google.maps.Geocoder();
     marker = new google.maps.Marker({
       map:map,
@@ -132,20 +128,29 @@ function startUp(){
     }
 }
 
-function findVehicle(){
-	updateStatus('Looking for vehicle data provider');
-	allServices = {};
-	vehicle = null;
-	webinos.discovery.findServices( 
-		new ServiceType('http://webinos.org/api/vehicle'),{onFound: function (service) {
-			updateStatus('Vehicle found');
-			vehicle = service;
-			bindToVehicle();        		
-		
-		}}
-	);
-}
 
+function findsensors(){
+	updateStatus('Looking for sensors data provider');
+	allServices = {};
+	sensors = {};
+	
+	webinos.discovery.findServices(
+ 	new ServiceType('http://webinos.org/api/sensors/*'),
+ 	{onFound: function (service) {
+		updateStatus('sensors service found');
+		//sensors[service.api] = service;
+		//bindToSensors(service.api);
+                if (service.api == "http://webinos.org/api/sensors/rpm"){ 
+				updateStatus('RPM sensors found');
+				sensors[service.api] = service;
+				bindToSensors(service.api);  
+			} else if (service.api == "http://webinos.org/api/sensors/vss"){ 
+                                updateStatus('VSS sensors found');
+				sensors[service.api] = service;
+				bindToSensors(service.api);  
+			}
+	}});
+}
 
 function findGeolocation(){
 	updateStatus('Looking for a geolocation provider');
@@ -176,11 +181,11 @@ function findDeviceOrientation(){
 		
 	}});
 }
-function bindToVehicle(){
-	updateStatus('Binding to Vehicle');
-	vehicle.bindService({onBind:function(service) {
-		updateStatus('Bound to Vehicle');
-		registerVehicleListeners();
+function bindToSensors(api){
+	updateStatus('Binding to Sensors');
+	sensors[api].bindService({onBind:function(service) {
+		updateStatus('Bound to sensors');
+		registersensorsListeners(api);
 	}});
 }
 
@@ -201,28 +206,51 @@ function bindToDeviceOrientation(){
 	}});
 }
 
-function registerVehicleListeners(){
-	updateStatus('Adding Listener Vehicle API');
-	vehicle.get('gear', handleGear, errorCB);
-	vehicle.addEventListener('gear', handleGear, false);
-	updateStatus('Vehicle VSS listeners registered.');
-        vehicle.get('vss', handleAverageData, errorCB);
-	vehicle.addEventListener('vss', handleAverageData, false);
-        updateStatus('Vehicle RPM listeners registered.');
-        vehicle.get('rpm', handleAverageData, errorCB);
-	vehicle.addEventListener('rpm', handleAverageData, false);
-        updateStatus('Vehicle Load PCT listeners registered.');
-        vehicle.get('load_pct', handleAverageData, errorCB);
-	vehicle.addEventListener('load_pct', handleAverageData, false);
-        updateStatus('Vehicle FRP listeners registered.');
-        vehicle.get('frp', handleAverageData, errorCB);
-	//vehicle.addEventListener('frp', handleAverageData, false);
-        updateStatus('Vehicle Temp listeners registered.');
-        vehicle.get('temp', handleAverageData, errorCB);
-	//vehicle.addEventListener('temp', handleAverageData, false);
-	/*updateStatus('Vehicle listeners registered.');
-	vehicle.get('tripcomputer', handleAverageData, errorCB);
-	vehicle.addEventListener('tripcomputer', handleAverageData, false);*/
+function registersensorsListeners(api){
+        //alert(sensors); 
+	/*updateStatus('Adding Listener sensors API');
+	sensors.get('gear', handleGear, errorCB);
+	sensors.addEventListener('gear', handleGear, false);
+	updateStatus('sensors VSS listeners registered.');
+        sensors.get('vss', handleAverageData, errorCB);
+	sensors.addEventListener('vss', handleAverageData, false);
+        updateStatus('sensors RPM listeners registered.');
+        sensors.get('rpm', handleAverageData, errorCB);
+	sensors.addEventListener('rpm', handleAverageData, false);
+        updateStatus('sensors Load PCT listeners registered.');
+        sensors.get('load_pct', handleAverageData, errorCB);
+	sensors.addEventListener('load_pct', handleAverageData, false);
+        updateStatus('sensors FRP listeners registered.');
+        sensors.get('frp', handleAverageData, errorCB);
+	//sensors.addEventListener('frp', handleAverageData, false);
+        updateStatus('sensors Temp listeners registered.');
+        sensors.get('temp', handleAverageData, errorCB);*/
+	//sensors.addEventListener('temp', handleAverageData, false);
+	/*updateStatus('sensors listeners registered.');
+	sensors.get('tripcomputer', handleAverageData, errorCB);
+	sensors.addEventListener('tripcomputer', handleAverageData, false);*/
+        //sensors.get('rpm', onSensorEvent, errorCB);
+	/*updateStatus('sensors listeners registered.');
+       // sensors.addEventListener('sensor', onSensorEvent, false);
+
+        sensors[rpm].addEventListener('sensor', onSensorEvent, false);
+        sensorActive[rpm] = true;*/
+
+       /* updateStatus('sensors VSS listeners registered.');
+        sensors.get('vss', handleAverageData, errorCB);
+	sensors.addEventListener('vss', handleAverageData, false);
+        updateStatus('sensors RPM listeners registered.');
+        sensors.get('rpm', handleAverageData, errorCB);
+	sensors.addEventListener('rpm', handleAverageData, false);*/
+
+        /*updateStatus('sensors RPM listeners registered.');
+	sensors[api].addEventListener('rpm', handleAverageData, false);
+        updateStatus('sensors VSS listeners registered.');
+	sensors[api].addEventListener('vss', handleAverageData, false);*/
+        
+        updateStatus('sensors RPM listeners registered.');
+	sensors[api].addEventListener('sensor', handleAverageData, false);
+
 	findGeolocation();
 }
 
@@ -253,7 +281,7 @@ function fillPZAddrs(data) {
 	  pzhId = data.payload.message.pzhId;                                     
 	  connectedPzp = data.payload.message.connectedPzp; // all connected pzp
 	  connectedPzh = data.payload.message.connectedPzh; // all connected pzh
-		findVehicle();
+		findsensors();
 		//findGeolocation();
 	}
 }
@@ -400,18 +428,24 @@ function handleGear(data){
 }
 
 function handleAverageData(data){
+       // alert(JSON.stringify(data));
+//	if(data.sensorType === "http://webinos.org/api/sensors/rpm") $('#v-consumption').html(data.sensorValues);
+//	if(data.sensorType === "http://webinos.org/api/sensors/vss") $('#v-avg-speed').html(data.sensorValues);
 
-	$('#v-avg-speed').html(data.vss);
-	$('#v-consumption').html(data.rpm);
+        if(data.sensorType === "http://webinos.org/api/sensors/rpm") $('#v-consumption').html(data.vss);
+	if(data.sensorType === "http://webinos.org/api/sensors/vss") $('#v-avg-speed').html(data.rpm);
+
+       // $('#v-consumption').html(data.vss);
+      //	$('#v-avg-speed').html(data.rpm);
 	$('#v-distance').html(data.load_pct);
 	$('#v-range').html(data.frp);
 	$('#v-mileage').html(data.temp);
 	
-	dataModel[8].defaultV = data.rpm;
-	dataModel[9].defaultV =data.vss;
-	dataModel[10].defaultV =data.temp;
-	dataModel[11].defaultV =data.load_pct;
-	dataModel[12].defaultV =data.frp;
+	dataModel[8].defaultV = data.rpm;//data.sensorValues;
+	dataModel[9].defaultV = data.vss;//data.sensorValues;
+	dataModel[10].defaultV = data.temp;
+	dataModel[11].defaultV = data.load_pct;
+	dataModel[12].defaultV = data.frp;
 	
 	if(dataModel[8].customField != null){
 		$('#' + dataModel[8].customField).find('.value').html(data.rpm);
