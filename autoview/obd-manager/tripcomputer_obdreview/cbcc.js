@@ -12,8 +12,14 @@ var geolocation;
 var deviceorientation;
 var ps;
 
-var gear;
+//Gauge
+var min_gauge_range=-10;
+var max_gauge_range=700;
+var sensors_type = "http://webinos.org/api/sensors/vss";
+//var service_types = ["http://webinos.org/api/sensors/vss"];
+//-----
 
+var gear;
 
 var active = '#drive';
 
@@ -21,8 +27,6 @@ var selecterOn = false;
 var pdcEnabled = false;
 
 var currentCustomField = '';
-
-
 
 dataModel = [{id: 'selecter-gear', desc:'Gear' , unit: '', defaultV:'10', customField: 'customfield1'}, 
 {id: 'selecter-speed', desc:'Speed' , unit: 'kmph', defaultV:'0.0', customField: null}, //'customfield2'}, 
@@ -171,39 +175,6 @@ function findsensors(){
 	}});
 }
 
-/*function findsensors(){
-	updateStatus('Looking for sensors data provider');
-	allServices = {};
-	sensors = {};
-	webinos.discovery.findServices( 
-		new ServiceType('http://webinos.org/api/sensors'),{onFound: function (service) {
-
-                        //sensors[service.id] = service;
-			//sensorActive[service.id] = false;
-			service.bind({
-			onBind:function(){
-		        console.log("Service "+service.api+" bound");
-		        console.log(service);*/
-			/*if (service.api == "http://webinos.org/api/sensors/rpm"){ 
-				updateStatus('RPM sensors found');
-				sensors[service.api] = service;
-				bindToSensors(service.api);  
-			} else if (service.api == "http://webinos.org/api/sensors/vss"){ 
-                                updateStatus('VSS sensors found');
-				sensors[service.api] = service;
-				bindToSensors(service.api);  
-			}*/
-            /*            updateStatus('sensors found');
-			sensors[service.api] = service;
-			bindToSensors(service.api); 
-                        alert(JSON.stringify(sensors));      				
-		}}
-	);
-}
-}
-}*/
-
-
 function findGeolocation(){
 	updateStatus('Looking for a geolocation provider');
 	allServices = {};
@@ -257,6 +228,76 @@ function bindToDeviceOrientation(){
 		$('#loading').addClass('disabled');
 	}});
 }
+
+//Gauge
+google.load("visualization", "1", {packages:["corechart"]});
+
+Function.prototype.subclassFrom=function(superClassFunc) {
+        if (superClassFunc == null) {
+            this.prototype={};
+        } 
+        else {
+            this.prototype = new superClassFunc();
+            this.prototype.constructor=this;
+            this.superConstructor=superClassFunc;   
+      }
+    }
+
+    Function.prototype.methods=function(funcs) {
+        for (each in funcs) 
+            if (funcs.hasOwnProperty(each)) {
+                var original=this.prototype[each];
+                funcs[each].superFunction=original;
+                this.prototype[each]=funcs[each];
+            }
+    }
+
+function Graphic(idChart, X, Y) {
+		this.id = idChart;
+		this.service.api="http://webinos.org/api/sensors/vss";
+		this.sensor_active={};
+		this.minRange;
+		this.maxRange;
+		this.coord = {
+			x:X,
+			y:Y
+		}
+    }
+
+Graphic.methods({
+        setVal : function(val) {},
+        getHTMLContent : function(){
+        	var idChart = this.id;
+        	var html = ""; }
+});
+
+function Gauge(idChart, X, Y){
+    	arguments.callee.superConstructor.call(this, idChart, X, Y);
+		this.type="gauge";
+		this.minRange=min_gauge_range;
+		this.maxRange=max_gauge_range;
+
+        if(data.sensorType === "http://webinos.org/api/sensors/vss") $('#vt-distance').html(data.sensorValues[0]);
+		
+		//$("#vt-distance).prepend(this.getHTMLContent());
+		this.chart = new RGraph.Gauge("vt-distance"+this.id, min_gauge_range, max_gauge_range, 0);
+		RGraph.Effects.Gauge.Grow(this.chart);
+    }
+   
+    Gauge.subclassFrom(Graphic);
+    
+    Gauge.methods({
+    	setVal : function(val) {
+    		this.chart.value = val;
+			RGraph.Effects.Gauge.Grow(this.chart);
+    	},
+        getHTMLContent : function(){
+        	var html = arguments.callee.superFunction.call(this);
+        	html += "<canvas class='travel' id='vt-distance"+this.id+"' width='250' height='250'></canvas></div></div>";        	
+        	return html;
+        }
+    });
+
 
 function registersensorsListeners(api){
         //alert(sensors); 	
