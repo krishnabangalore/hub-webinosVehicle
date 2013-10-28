@@ -229,6 +229,24 @@ function bindToDeviceOrientation(){
 	}});
 }
 
+
+
+
+/*var gauge = new RGraph.Gauge('cvs_onadjust', 0,200,67);
+    gauge.Set('chart.adjustable', true);
+    gauge.Draw();
+    
+    RGraph.AddCustomEventListener(gauge, 'onadjust', function (obj)
+    {
+        //if(data.sensorType === "http://webinos.org/api/sensors/load_pct") $('#v-distance').html(data.sensorValues[0]);
+        // Get the value from the chart
+        var value = obj.value;
+        
+        // Update the text input with the new reading (formatted to have 1 decimal)
+        document.getElementById("gauge_readout").value = value.toFixed(1);;
+    });*/
+
+/*
 //Gauge
 google.load("visualization", "1", {packages:["corechart"]});
 
@@ -297,7 +315,7 @@ function Gauge(idChart, X, Y){
         	return html;
         }
     });
-
+*/
 
 function registersensorsListeners(api){
         //alert(sensors); 	
@@ -318,6 +336,8 @@ function registersensorsListeners(api){
 
         updateStatus('sensors listeners registered.');
 	sensors[api].addEventListener('sensor', handleAverageData, false);
+        updateStatus('sensors listeners registered.');
+	sensors[api].addEventListener('sensor', handlegraphData, false);
 
 	findGeolocation();
 }
@@ -495,12 +515,24 @@ function handleGear(data){
 	}
 }
 
+
+function handlegraphData(data){ 
+
+if(data.sensorType === "http://webinos.org/api/sensors/load_pct") //$('#v-distance').html(data.sensorValues[0]);
+{
+ var chart = new RGraph.Gauge("v-distance",0,400,0);
+        //RGraph.Effects.Gauge.Grow(this.chart);
+        chart.value =  data.sensorValues[0];
+        RGraph.Effects.Gauge.Grow(chart);
+}
+}
+
 function handleAverageData(data){
        // alert(JSON.stringify(data));
 	if(data.sensorType === "http://webinos.org/api/sensors/rpm") $('#v-consumption').html(data.sensorValues[0]);
 	if(data.sensorType === "http://webinos.org/api/sensors/vss") $('#v-avg-speed').html(data.sensorValues[0]);
         if(data.sensorType === "http://webinos.org/api/sensors/temp") $('#v-mileage').html(data.sensorValues[0]);
-	if(data.sensorType === "http://webinos.org/api/sensors/load_pct") $('#v-distance').html(data.sensorValues[0]);
+	//if(data.sensorType === "http://webinos.org/api/sensors/load_pct") $('#v-distance').html(data.sensorValues[0]);
         if(data.sensorType === "http://webinos.org/api/sensors/frp") $('#v-range').html(data.sensorValues[0]);
 
      // if(data.sensorType === "http://webinos.org/api/sensors/rpm") $('#v-consumption').html(data.rpm);
@@ -516,7 +548,7 @@ function handleAverageData(data){
         dataModel[8].defaultV = data.sensorValues[0]; //data.rpm;
 	dataModel[9].defaultV = data.sensorValues[0]; //data.vss;
 	dataModel[10].defaultV = data.sensorValues[0];//data.temp;
-	dataModel[11].defaultV = data.sensorValues[0];//data.load_pct;
+	//dataModel[11].defaultV = data.sensorValues[0];//data.load_pct;
 	dataModel[12].defaultV = data.sensorValues[0];//data.frp;
 	
 	if(dataModel[8].customField != null){
@@ -531,10 +563,10 @@ function handleAverageData(data){
 		$('#' + dataModel[10].customField).find('.value').html(data.sensorValues[0]); //data.temp
 		
 	}
-	if(dataModel[11].customField != null){
+	/*if(dataModel[11].customField != null){
 		$('#' + dataModel[11].customField).find('.value').html(data.sensorValues[0]); //data.load_pct
 		
-	}
+	}*/
 	if(dataModel[12].customField != null){
 		$('#' + dataModel[12].customField).find('.value').html(data.sensorValues[0]); //data.frp
 		
