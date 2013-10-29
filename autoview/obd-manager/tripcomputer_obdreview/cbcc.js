@@ -229,94 +229,6 @@ function bindToDeviceOrientation(){
 	}});
 }
 
-
-
-
-/*var gauge = new RGraph.Gauge('cvs_onadjust', 0,200,67);
-    gauge.Set('chart.adjustable', true);
-    gauge.Draw();
-    
-    RGraph.AddCustomEventListener(gauge, 'onadjust', function (obj)
-    {
-        //if(data.sensorType === "http://webinos.org/api/sensors/load_pct") $('#v-distance').html(data.sensorValues[0]);
-        // Get the value from the chart
-        var value = obj.value;
-        
-        // Update the text input with the new reading (formatted to have 1 decimal)
-        document.getElementById("gauge_readout").value = value.toFixed(1);;
-    });*/
-
-/*
-//Gauge
-google.load("visualization", "1", {packages:["corechart"]});
-
-Function.prototype.subclassFrom=function(superClassFunc) {
-        if (superClassFunc == null) {
-            this.prototype={};
-        } 
-        else {
-            this.prototype = new superClassFunc();
-            this.prototype.constructor=this;
-            this.superConstructor=superClassFunc;   
-      }
-    }
-
-    Function.prototype.methods=function(funcs) {
-        for (each in funcs) 
-            if (funcs.hasOwnProperty(each)) {
-                var original=this.prototype[each];
-                funcs[each].superFunction=original;
-                this.prototype[each]=funcs[each];
-            }
-    }
-
-function Graphic(idChart, X, Y) {
-		this.id = idChart;
-		this.service.api="http://webinos.org/api/sensors/vss";
-		this.sensor_active={};
-		this.minRange;
-		this.maxRange;
-		this.coord = {
-			x:X,
-			y:Y
-		}
-    }
-
-Graphic.methods({
-        setVal : function(val) {},
-        getHTMLContent : function(){
-        	var idChart = this.id;
-        	var html = ""; }
-});
-
-function Gauge(idChart, X, Y){
-    	arguments.callee.superConstructor.call(this, idChart, X, Y);
-		this.type="gauge";
-		this.minRange=min_gauge_range;
-		this.maxRange=max_gauge_range;
-
-        if(data.sensorType === "http://webinos.org/api/sensors/vss") $('#vt-distance').html(data.sensorValues[0]);
-		
-		//$("#vt-distance).prepend(this.getHTMLContent());
-		this.chart = new RGraph.Gauge("vt-distance"+this.id, min_gauge_range, max_gauge_range, 0);
-		RGraph.Effects.Gauge.Grow(this.chart);
-    }
-   
-    Gauge.subclassFrom(Graphic);
-    
-    Gauge.methods({
-    	setVal : function(val) {
-    		this.chart.value = val;
-			RGraph.Effects.Gauge.Grow(this.chart);
-    	},
-        getHTMLContent : function(){
-        	var html = arguments.callee.superFunction.call(this);
-        	html += "<canvas class='travel' id='vt-distance"+this.id+"' width='250' height='250'></canvas></div></div>";        	
-        	return html;
-        }
-    });
-*/
-
 function registersensorsListeners(api){
         //alert(sensors); 	
         /*sensors[rpm].addEventListener('sensor', onSensorEvent, false);
@@ -328,11 +240,6 @@ function registersensorsListeners(api){
         updateStatus('sensors RPM listeners registered.');
         sensors.get('rpm', handleAverageData, errorCB);
 	sensors.addEventListener('rpm', handleAverageData, false);*/
-
-        /*updateStatus('sensors RPM listeners registered.');
-	sensors[api].addEventListener('rpm', handleAverageData, false);
-        updateStatus('sensors VSS listeners registered.');
-	sensors[api].addEventListener('vss', handleAverageData, false);*/
 
         updateStatus('sensors listeners registered.');
 	sensors[api].addEventListener('sensor', handleAverageData, false);
@@ -516,7 +423,10 @@ function handleGear(data){
 }
 
 
+//Gauge Graph 
 function handlegraphData(data){ 
+
+//google.load("visualization", "1", {packages:["corechart"]});
 
 if(data.sensorType === "http://webinos.org/api/sensors/load_pct") //$('#v-distance').html(data.sensorValues[0]);
 {
